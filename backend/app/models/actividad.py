@@ -12,7 +12,6 @@ class ActividadFinal(Base):
     hora_limite = Column(Time)
 
     horario = relationship("Horario", back_populates="actividades")
-    respuestas = relationship("RespActividad", back_populates="actividad")
 
 class RespActividad(Base):
     __tablename__ = "resp_actividad"
@@ -24,4 +23,3 @@ class RespActividad(Base):
     comentario = Column(Text)
 
     inscripcion = relationship("Inscripcion", back_populates="respuestas")
-    actividad = relationship("ActividadFinal", back_populates="respuestas")
