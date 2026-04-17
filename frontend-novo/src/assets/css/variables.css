@@ -1,0 +1,77 @@
+/* ============================================================
+   LASIN 2.0 — Design Tokens
+   Paleta oficial: LASIN Informática UMSA 2025
+   ============================================================ */
+
+:root {
+  /* === Colores base === */
+  --color-bg:        #0d1b2e;
+  --color-surface:   #0a1628;
+  --color-surface-2: #111f35;
+
+  /* === Paleta LASIN === */
+  --color-cyan:      #00d4ff;
+  --color-cyan-dim:  rgba(0, 212, 255, 0.12);
+  --color-blue:      #0077b6;
+  --color-blue-mid:  #00b4d8;
+  --color-gold:      #c8a800;
+  --color-gold-dim:  rgba(200, 168, 0, 0.12);
+
+  /* === Bordes === */
+  --border-subtle:   rgba(0, 212, 255, 0.08);
+  --border-cyan:     rgba(0, 212, 255, 0.35);
+  --border-soft:     rgba(255, 255, 255, 0.07);
+
+  /* === Estado === */
+  --color-success:   #22c55e;
+  --color-warning:   #fbbf24;
+  --color-error:     #ef4444;
+  --color-info:      #00d4ff;
+  --color-purple:    #a855f7;
+
+  /* === Texto === */
+  --text-primary:    #f0f8ff;
+  --text-muted:      #7a96b0;
+  --text-dim:        #4a6080;
+
+  /* === Roles === */
+  --color-estudiante: #00d4ff;
+  --color-docente:    #c8a800;
+  --color-admin:      #22c55e;
+  --color-superadmin: #a855f7;
+  --color-sistema:    #7a96b0;
+
+  /* === Tipografía === */
+  --font-main:  'Sora', sans-serif;
+  --text-xs:    10px;
+  --text-sm:    12px;
+  --text-base:  14px;
+  --text-md:    15px;
+  --text-lg:    18px;
+  --text-xl:    22px;
+  --text-2xl:   26px;
+
+  /* === Espaciado === */
+  --radius-sm:  8px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  16px;
+  --radius-2xl: 20px;
+  --radius-pill: 100px;
+
+  /* === Sombras === */
+  --shadow-panel: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-cyan:  0 6px 20px rgba(0, 180, 216, 0.35);
+  --shadow-card:  0 10px 36px rgba(0, 0, 0, 0.35);
+
+  /* === Transiciones === */
+  --transition-fast:   all 0.15s ease;
+  --transition-normal: all 0.2s ease;
+  --transition-slow:   all 0.3s ease;
+
+  /* === Gradientes === */
+  --gradient-cyan:  linear-gradient(135deg, #0077b6, #00d4ff);
+  --gradient-gold:  linear-gradient(135deg, #c8a800, #f0c800);
+  --gradient-green: linear-gradient(135deg, #22c55e, #16a34a);
+  --gradient-bar:   linear-gradient(180deg, #00d4ff, #0077b6);
+}

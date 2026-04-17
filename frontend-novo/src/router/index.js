@@ -46,11 +46,9 @@ const router = createRouter({
 })
 
 // Guard — protege rutas que requieren autenticación
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   if (to.meta.requiresAuth && !authService.estaAutenticado()) {
-    next('/login')
-  } else {
-    next()
+    return '/login'
   }
 })
 

@@ -131,26 +131,30 @@
 </template>
 
 <script setup>
+// ─── Imports ────────────────────────────────────────────────
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService } from '../services/auth.js'
 
+// ─── Router ─────────────────────────────────────────────────
 const router = useRouter()
 
-const email           = ref('')
-const password        = ref('')
-const rolSeleccionado = ref('estudiante')
-const cargando        = ref(false)
-const errorMsg        = ref('')
-const mostrarPassword = ref(false)
+// ─── Estado ─────────────────────────────────────────────────
+const email            = ref('')
+const password         = ref('')
+const rolSeleccionado  = ref('estudiante')
+const cargando         = ref(false)
+const errorMsg         = ref('')
+const mostrarPassword  = ref(false)
 
+// ─── Constantes ─────────────────────────────────────────────
 const roles = [
-  { value: 'estudiante', label: 'Estudiante',   icono: '🎓' },
-  { value: 'docente',    label: 'Docente',       icono: '👨‍🏫' },
-  { value: 'admin',      label: 'Administrador', icono: '🗂️' },
-  { value: 'superadmin', label: 'Super Admin',   icono: '⚙️' },
+  { value: 'estudiante', label: 'Estudiante',    icono: '🎓' },
+  { value: 'docente',    label: 'Docente',        icono: '👨‍🏫' },
+  { value: 'admin',      label: 'Administrador',  icono: '🗂️' },
+  { value: 'superadmin', label: 'Super Admin',    icono: '⚙️' },
 ]
 
+// Rutas por rol — en el futuro esto vendrá del backend (JWT payload)
 const rutasPorRol = {
   estudiante: '/estudiante/dashboard',
   docente:    '/docente/dashboard',
@@ -158,6 +162,7 @@ const rutasPorRol = {
   superadmin: '/superadmin/dashboard',
 }
 
+// Placeholder dinámico según rol seleccionado
 const placeholderEmail = computed(() => {
   const map = {
     estudiante: 'usuario@est.umsa.bo',
@@ -168,6 +173,12 @@ const placeholderEmail = computed(() => {
   return map[rolSeleccionado.value]
 })
 
+// ─── Métodos ─────────────────────────────────────────────────
+
+/**
+ * Valida los campos del formulario antes de enviar.
+ * @returns {boolean} true si todo es válido
+ */
 function validarFormulario() {
   if (!email.value.trim()) {
     errorMsg.value = 'El correo es obligatorio.'
@@ -187,49 +198,41 @@ function validarFormulario() {
   }
   return true
 }
+
+/**
+ * Maneja el inicio de sesión.
+ * TODO: reemplazar simulación por llamada real a la API Flask.
+ */
 async function ingresar() {
   errorMsg.value = ''
+
   if (!validarFormulario()) return
 
   cargando.value = true
+
   try {
-    const data = await authService.login(email.value, password.value)
-    const rol = data.rol
+    // TODO: reemplazar por → await authService.login({ email, password, rol })
+    await new Promise(resolve => setTimeout(resolve, 1200))
 
-    // Verificar que el rol del backend coincide con el seleccionado
-    if (rol === 'sin_rol') {
-      errorMsg.value = 'Tu cuenta no tiene rol asignado. Contacta al administrador.'
-      authService.logout()
-      return
-    }
-
-    if (rol !== rolSeleccionado.value) {
-      errorMsg.value = `Tu rol es ${rol}, no ${rolSeleccionado.value}.`
-      authService.logout()
-      return
-    }
-
-    const ruta = rutasPorRol[rol] || '/login'
-    router.push(ruta)
+    // Redirige según rol seleccionado
+    router.push(rutasPorRol[rolSeleccionado.value])
 
   } catch (error) {
-    if (error.response?.status === 401) {
-      errorMsg.value = 'Correo o contraseña incorrectos.'
-    } else if (error.response?.status === 403) {
-      errorMsg.value = error.response.data.detail
-    } else {
-      errorMsg.value = 'Error al conectar con el servidor.'
-    }
+    errorMsg.value = 'Error al conectar con el servidor. Intenta de nuevo.'
+    console.error('[Login] Error:', error)
   } finally {
     cargando.value = false
   }
 }
-
-
-
 </script>
 
 <style scoped>
+/* ─────────────────────────────────────────────────────────────
+   LoginView — estilos específicos de esta pantalla.
+   Los estilos globales (panel, input-base, btn-primary, etc.)
+   vienen de assets/css/components.css
+   ───────────────────────────────────────────────────────────── */
+
 .login-page {
   display: flex;
   min-height: 100vh;
@@ -238,6 +241,7 @@ async function ingresar() {
   color: var(--text-primary);
 }
 
+/* ── Hero (izquierda) ───────────────────────────────────── */
 .login-hero {
   flex: 1;
   background:
@@ -295,6 +299,7 @@ async function ingresar() {
 .hero-stat__num   { font-size: 28px; font-weight: 800; line-height: 1; }
 .hero-stat__label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
+/* ── Formulario (derecha) ───────────────────────────────── */
 .login-form-wrap {
   width: 480px;
   flex-shrink: 0;
@@ -305,9 +310,11 @@ async function ingresar() {
 }
 
 .login-form { width: 100%; }
+
 .form-head       { margin-bottom: 28px; }
 .form-head h2    { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
 
+/* ── Selector de rol ────────────────────────────────────── */
 .role-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -341,37 +348,10 @@ async function ingresar() {
 .role-btn__icon  { font-size: 22px; }
 .role-btn__label { font-size: 12px; font-weight: 600; }
 
+/* ── Campos ─────────────────────────────────────────────── */
 .mt-3 { margin-top: 14px; }
 .mt-4 { margin-top: 20px; }
 .w-full { width: 100%; }
-
-.field-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text-primary);
-}
-
-.search-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border-soft);
-  border-radius: 8px;
-  padding: 10px 14px;
-}
-
-.input-base {
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text-primary);
-  font-family: var(--font-main);
-  font-size: 14px;
-  width: 100%;
-}
 
 .btn-toggle-pass {
   margin-top: 6px;
@@ -382,34 +362,23 @@ async function ingresar() {
   font-size: 11px;
   cursor: pointer;
   padding: 0;
+  transition: var(--transition-normal);
 }
 
 .btn-toggle-pass:hover { color: var(--color-cyan); }
 
+/* ── Error ──────────────────────────────────────────────── */
 .login-error {
   margin-top: 14px;
   padding: 12px 16px;
   background: rgba(239,68,68,0.08);
   border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: #fca5a5;
   font-size: 13px;
 }
 
-.btn-primary {
-  display: block;
-  padding: 12px 24px;
-  background: var(--color-cyan, #00d4ff);
-  color: #000;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
+/* ── Spinner ────────────────────────────────────────────── */
 .spinner {
   display: inline-block;
   width: 18px;
@@ -422,6 +391,7 @@ async function ingresar() {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── Footer ─────────────────────────────────────────────── */
 .login-footer-text {
   margin-top: 20px;
   text-align: center;
@@ -435,8 +405,5 @@ async function ingresar() {
   font-weight: 600;
 }
 
-.text-cyan { color: var(--color-cyan, #00d4ff); }
-.text-gold { color: #f59e0b; }
-.text-success { color: #10b981; }
-.text-muted { color: var(--text-muted, #888); }
+.link-cyan:hover { text-decoration: underline; }
 </style>
