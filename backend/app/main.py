@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.routers import auth, usuarios, cursos, horarios
+from app.routers import auth, usuarios, cursos, horarios, inscripciones
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,6 +19,7 @@ app.include_router(auth.router)
 app.include_router(usuarios.router)
 app.include_router(cursos.router)
 app.include_router(horarios.router)
+app.include_router(inscripciones.router)
 
 @app.get("/")
 def root():
