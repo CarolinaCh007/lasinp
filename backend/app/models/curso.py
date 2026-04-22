@@ -22,6 +22,7 @@ class Curso(Base):
     estado = Column(String(20), default="pendiente")
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    link_whatsapp = Column(Text)
 
     horarios = relationship("Horario", back_populates="curso")
     temas = relationship("Tema", back_populates="curso")

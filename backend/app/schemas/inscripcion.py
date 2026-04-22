@@ -29,6 +29,7 @@ class PagoCreate(BaseModel):
     precio: Decimal
     metodo_pago: Optional[str] = None
     identificador_deuda: Optional[str] = None
+    ci_nit_facturacion: Optional[str] = None
 
 class PagoResponse(BaseModel):
     id_pago: int
@@ -40,6 +41,7 @@ class PagoResponse(BaseModel):
     metodo_pago: Optional[str] = None
     codigo_recaudacion: Optional[str] = None
     url_pasarela: Optional[str] = None
+    ci_nit_facturacion: Optional[str] = None
     created_at: Optional[datetime] = None
 
     class Config:

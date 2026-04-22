@@ -17,6 +17,7 @@ class CursoCreate(BaseModel):
     cupos_totales: Optional[int] = None
     imagen_url: Optional[str] = None
     duracion: Optional[str] = None
+    link_whatsapp: Optional[str] = None
 
 class CursoResponse(BaseModel):
     id_curso: int
@@ -33,6 +34,7 @@ class CursoResponse(BaseModel):
     cupos_totales: Optional[int] = None
     imagen_url: Optional[str] = None
     duracion: Optional[str] = None
+    link_whatsapp: Optional[str] = None
     estado: Optional[str] = None
     created_at: Optional[datetime] = None
 
@@ -48,4 +50,5 @@ class CursoUpdate(BaseModel):
     costo: Optional[Decimal] = None
     cupos_totales: Optional[int] = None
     imagen_url: Optional[str] = None
+    link_whatsapp: Optional[str] = None
     estado: Optional[str] = None

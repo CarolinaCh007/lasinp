@@ -38,11 +38,11 @@ class Pago(Base):
     observaciones = Column(Text)
     url_pasarela = Column(Text)
     identificador_deuda = Column(Text)
+    ci_nit_facturacion = Column(String(20))
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     inscripcion = relationship("Inscripcion", back_populates="pagos")
-
 class Asistencia(Base):
     __tablename__ = "asistencia"
     id_asistencia = Column(Integer, primary_key=True, index=True)
