@@ -18,6 +18,8 @@ class CursoCreate(BaseModel):
     imagen_url: Optional[str] = None
     duracion: Optional[str] = None
     link_whatsapp: Optional[str] = None
+    requisitos_tecnicos: Optional[str] = None
+    requisitos_previos: Optional[str] = None
 
 class CursoResponse(BaseModel):
     id_curso: int
@@ -37,6 +39,8 @@ class CursoResponse(BaseModel):
     link_whatsapp: Optional[str] = None
     estado: Optional[str] = None
     created_at: Optional[datetime] = None
+    requisitos_tecnicos: Optional[str] = None
+    requisitos_previos: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -52,3 +56,5 @@ class CursoUpdate(BaseModel):
     imagen_url: Optional[str] = None
     link_whatsapp: Optional[str] = None
     estado: Optional[str] = None
+    requisitos_tecnicos: Optional[str] = None
+    requisitos_previos: Optional[str] = None
