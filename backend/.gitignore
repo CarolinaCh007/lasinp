@@ -1,4 +1,27 @@
+# 🔹 Entorno virtual
 venv/
-.env
-__pycache__/
+env/
 *.pyc
+__pycache__/
+
+# 🔹 Variables de entorno (NUNCA subir credenciales)
+.env
+.env.local
+*.env
+
+# 🔹 IDE
+.vscode/
+.idea/
+*.swp
+
+# 🔹 Logs y temporales
+*.log
+tmp/
+temp/
+
+# 🔹 Base de datos local (si usas SQLite)
+*.db
+*.sqlite3
+
+# 🔹 Docker (opcional, si no quieres subir imágenes)
+*.tar
