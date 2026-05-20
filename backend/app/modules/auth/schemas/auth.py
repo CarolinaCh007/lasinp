@@ -117,3 +117,49 @@ class PasswordResetConfirm(BaseModel):
         if not any(c.isupper() for c in v) or not any(c.isdigit() for c in v):
             raise ValueError('Debe incluir mayúscula y número')
         return v
+
+class RoleInfo(BaseModel):
+    """Información del rol del usuario"""
+    id_rol: int
+    nombre: str
+    descripcion: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+class InstanceInfo(BaseModel):
+    """Información de la instancia (usuario-rol)"""
+    id_usuario: int
+    id_rol: int
+    fecha_asignacion: Optional[datetime] = None
+    rol: Optional[RoleInfo] = None
+    
+    class Config:
+        from_attributes = True
+
+class UserInfo(BaseModel):
+    """Datos públicos del usuario (sin password)"""
+    id_usuario: int
+    ci: Optional[str]
+    correo_electronico: str
+    nombre: str
+    ape_paterno: Optional[str]
+    ape_materno: Optional[str]
+    celular: Optional[str]
+    foto_perfil: Optional[str]
+    estado: str
+    fecha_registro: datetime
+    created_at: datetime
+    updated_at: datetime
+    instancias: Optional[List[InstanceInfo]] = []
+    
+    class Config:
+        from_attributes = True
+
+class LoginResponse(BaseModel):
+    """Respuesta completa de login: token + usuario + rol principal"""
+    access_token: str
+    token_type: str
+    usuario: UserInfo
+    rol_principal: Optional[str] = None  # Rol con mayor privilegio o primero asignado
+    mensaje: Optional[str] = "Login exitoso"

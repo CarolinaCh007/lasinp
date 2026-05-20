@@ -1,9 +1,22 @@
-from .usuario import UsuarioCreate, UsuarioRead, UsuarioUpdate
-from .rol import RolCreate, RolRead
-from .auth import LoginRequest, Token, TokenData
+from .auth import (
+    Token,
+    LoginRequest,
+    ChangePasswordRequest,
+    StudentRegisterRequest,
+    TeacherCreateRequest,
+    AdminCreateRequest,
+    EmailVerificationResponse,
+    PasswordResetRequest,
+    PasswordResetConfirm,
+    LoginResponse,  # ← Agregar este
+    UserInfo,       # ← Opcional: si quieres usarlos por separado
+    RoleInfo,
+    InstanceInfo
+)
 
 __all__ = [
-    "UsuarioCreate", "UsuarioRead", "UsuarioUpdate",
-    "RolCreate", "RolRead",
-    "LoginRequest", "Token", "TokenData"
+    "Token", "LoginRequest", "ChangePasswordRequest",
+    "StudentRegisterRequest", "TeacherCreateRequest", "AdminCreateRequest",
+    "EmailVerificationResponse", "PasswordResetRequest", "PasswordResetConfirm",
+    "LoginResponse", "UserInfo", "RoleInfo", "InstanceInfo"  # ← Agregar estos
 ]

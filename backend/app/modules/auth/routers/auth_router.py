@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import timedelta, datetime
 from typing import Optional
 
+
 from app.core.database import get_db
 from app.core.config import settings
 from app.modules.auth.schemas.usuario import UsuarioCreate, UsuarioRead
@@ -15,7 +16,9 @@ from app.modules.auth.schemas.auth import (
     AdminCreateRequest,
     EmailVerificationResponse,
     PasswordResetRequest,
-    PasswordResetConfirm
+    PasswordResetConfirm,
+    LoginResponse
+
 )
 from app.modules.auth.services.auth_service import (
     hashear_password, 
@@ -29,7 +32,8 @@ from app.modules.auth.services.usuario_service import (
     crear_usuario_con_rol,
     verificar_email_usuario,
     solicitar_reset_password,
-    resetear_contrasena
+    resetear_contrasena,
+        obtener_usuario_completo_con_roles
 )
 from app.core.security import get_current_user, require_role
 from app.modules.auth.models.usuario import Usuario
@@ -40,13 +44,25 @@ router = APIRouter(prefix="/auth", tags=["🔐 Autenticación"])
 # 🔹 ENDPOINTS DE AUTENTICACIÓN BÁSICA
 # =============================================================================
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=LoginResponse)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
     request: Request = None
 ):
-    """Login: Intercambia credenciales por un token JWT."""
+    """
+    Login completo: devuelve token + datos del usuario + rol principal.
+    
+    Request (form-urlencoded):
+    - username: correo electrónico
+    - password: contraseña
+    
+    Response:
+    - access_token: JWT para autenticación
+    - usuario: datos públicos del usuario
+    - rol_principal: rol con mayor privilegio (para RBAC en frontend)
+    """
+    # 1. Buscar usuario por email (username en OAuth2Form)
     usuario = obtener_usuario_por_email(db, form_data.username)
     
     if not usuario or not verificar_password(form_data.password, usuario.password):
@@ -58,25 +74,41 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    # 2. Verificar que la cuenta esté activa
     if usuario.estado != "activo":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cuenta no verificada. Revisa tu correo electrónico."
+            detail=f"Cuenta no verificada. Estado actual: {usuario.estado}"
         )
     
+    # 3. Generar token JWT
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = crear_token_acceso(
         data={"sub": str(usuario.id_usuario)},
         expires_delta=access_token_expires
     )
     
+    # 4. Obtener usuario completo con roles (nueva función)
+    usuario_completo = obtener_usuario_completo_con_roles(db, usuario.id_usuario)
+    
+    if not usuario_completo:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al obtener datos completos del usuario"
+        )
+    
+    # 5. Registrar auditoría de login exitoso
     ip = request.client.host if request else None
     registrar_auditoria(db, usuario.id_usuario, "LOGIN_SUCCESS", "usuario", ip)
     
-    usuario.ultimo_acceso = datetime.utcnow()
-    db.commit()
-    
-    return {"access_token": access_token, "token_type": "bearer"}
+    # 6. Retornar respuesta completa
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        usuario=usuario_completo,
+        rol_principal=usuario_completo["rol_principal"],
+        mensaje="Login exitoso"
+    )
 
 @router.get("/me", response_model=UsuarioRead)
 def leer_usuario_actual(

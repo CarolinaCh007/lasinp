@@ -14,6 +14,7 @@ from app.modules.auth.services.auth_service import (
     verificar_token_seguro
 )
 from app.shared.email import EmailService
+from sqlalchemy.orm import joinedload
 
 # =============================================================================
 # 🔹 FUNCIONES DE CONSULTA DE USUARIOS (Solo tablas de auth/)
@@ -221,3 +222,61 @@ def actualizar_usuario(db: Session, id_usuario: int, update_data: Dict[str, Any]
     
     registrar_auditoria(db, db_usuario.id_usuario, "UPDATE_USER", "usuario")
     return db_usuario
+
+def obtener_usuario_completo_con_roles(db: Session, id_usuario: int) -> Optional[dict]:
+    """Versión simplificada sin joinedload"""
+    
+    # 1. Obtener usuario básico
+    usuario = db.get(Usuario, id_usuario)
+    if not usuario:
+        return None
+    
+    # 2. Obtener instancias con roles (query separada, pero solo para este usuario)
+    instancias = db.query(Instancia).options(
+        joinedload(Instancia.rol)
+    ).filter(Instancia.id_usuario == id_usuario).all()
+    
+    # Construir respuesta...
+    instancias_data = []
+    for instancia in instancias:
+        instancias_data.append({
+            "id_usuario": instancia.id_usuario,
+            "id_rol": instancia.id_rol,
+            "fecha_asignacion": instancia.fecha_asignacion,
+            "rol": {
+                "id_rol": instancia.rol.id_rol if instancia.rol else None,
+                "nombre": instancia.rol.nombre if instancia.rol else None,
+                "descripcion": instancia.rol.descripcion if instancia.rol else None,
+            } if instancia.rol else None
+        })
+    
+    # ... resto igual que antes ...
+    prioridad_rol = {"ADMIN": 4, "COORDINADOR": 3, "DOCENTE": 2, "ESTUDIANTE": 1}
+    rol_principal = None
+    max_prioridad = 0
+    
+    for inst in instancias_data:
+        nombre_rol = inst["rol"]["nombre"] if inst["rol"] else None
+        if nombre_rol and prioridad_rol.get(nombre_rol, 0) > max_prioridad:
+            max_prioridad = prioridad_rol[nombre_rol]
+            rol_principal = nombre_rol
+    
+    if not rol_principal and instancias_data:
+        rol_principal = instancias_data[0]["rol"]["nombre"] if instancias_data[0]["rol"] else None
+    
+    return {
+        "id_usuario": usuario.id_usuario,
+        "ci": usuario.ci,
+        "correo_electronico": usuario.correo_electronico,
+        "nombre": usuario.nombre,
+        "ape_paterno": usuario.ape_paterno,
+        "ape_materno": usuario.ape_materno,
+        "celular": usuario.celular,
+        "foto_perfil": usuario.foto_perfil,
+        "estado": usuario.estado,
+        "fecha_registro": usuario.fecha_registro,
+        "created_at": usuario.created_at,
+        "updated_at": usuario.updated_at,
+        "instancias": instancias_data,
+        "rol_principal": rol_principal
+    }
