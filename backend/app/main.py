@@ -11,6 +11,12 @@ from app.modules.academic import models as academic_models
 from app.modules.courses import models as courses_models
 from app.modules.scheduling import models as scheduling_models  # ← Nuevo módulo
 
+# 🔹 IMPORTAR MODELOS
+from app.modules.enrollment import models as enrollment_models  # ← Agregar
+
+# 🔹 REGISTRAR ROUTERS - Módulo ENROLLMENT
+from app.modules.enrollment.routers.inscripcion_router import router as inscripcion_router
+from app.modules.enrollment.routers.pago_router import router as pago_router
 # =============================================================================
 # 🔹 Inicializar FastAPI
 # =============================================================================
@@ -73,6 +79,9 @@ from app.modules.scheduling.routers.horario_router import router as horario_rout
 app.include_router(aula_router, prefix="/api/v1", tags=["🏫 Scheduling"])
 app.include_router(horario_router, prefix="/api/v1", tags=["🏫 Scheduling"])
 
+
+app.include_router(inscripcion_router, prefix="/api/v1", tags=["📝 Inscripciones y Pagos"])
+app.include_router(pago_router, prefix="/api/v1", tags=["📝 Inscripciones y Pagos"])
 # =============================================================================
 # 🔹 Startup: Crear tablas (solo para desarrollo)
 # =============================================================================
@@ -80,6 +89,13 @@ app.include_router(horario_router, prefix="/api/v1", tags=["🏫 Scheduling"])
 def startup_event():
     """Crea tablas si no existen (solo para desarrollo)"""
     Base.metadata.create_all(bind=engine)
+
+from app.modules.evaluation import models as evaluation_models
+
+# 🔹 REGISTRAR ROUTERS - Módulo EVALUATION
+from app.modules.evaluation.routers.evaluation_router import router as evaluation_router
+
+app.include_router(evaluation_router, prefix="/api/v1", tags=["📊 Evaluación y Certificados"])
 
 # =============================================================================
 # 🔹 Endpoints Root y Health
