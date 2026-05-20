@@ -1,24 +1,87 @@
-version: '3.8'
-
 services:
-  postgres:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lasin_backend
+    ports:
+      - "8000:8000"
+    environment:
+      # 🔹 Eliminar DATABASE_URL hardcoded ← ¡ESTO CAUSABA EL CONFLICTO!
+      # - DATABASE_URL=postgresql://lasin_user:lasin123@db:5432/lasin_db
+      
+      # 🔹 Usar variables separadas (Pydantic las leerá y construirá la URL con encoding)
+      - DB_USER=lasin_user
+      - DB_PASSWORD=lasin_user  # ← Puede tener ñ, ó, @, etc. (se codifica automáticamente)
+      - DB_HOST=db  # ← "db" es el nombre del servicio PostgreSQL en Docker
+      - DB_PORT=5432
+      - DB_NAME=lasin_db
+      
+      # 🔹 Otras variables
+      - SECRET_KEY=${SECRET_KEY:-dev_secret_change_me}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - SMTP_SERVER=${SMTP_SERVER:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - FROM_EMAIL=${FROM_EMAIL:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - ENVIRONMENT=production  # ← Para desactivar el debug print en config.py
+    
+    # 🔹 Montar .env para desarrollo local (opcional)
+    # Si lo usas, asegúrate de que NO tenga DATABASE_URL
+    volumes:
+      - ./backend:/app
+      # - ./backend/.env:/app/.env  ← Comentar si causa conflicto
+    
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - lasin_network
+  # 🔹 PostgreSQL
+  db:
     image: postgres:15-alpine
     container_name: lasin_postgres
     environment:
-      POSTGRES_USER: lasin_user
-      POSTGRES_PASSWORD: lasin123
-      POSTGRES_DB: lasin_db
-      # Forzar encoding UTF-8 en la inicialización
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      - POSTGRES_USER=lasin_user
+      - POSTGRES_PASSWORD=lasin123
+      - POSTGRES_DB=lasin_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - lasin_pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lasin_user -d lasin_db"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+    networks:
+      - lasin_network
+
+  # 🔹 pgAdmin (opcional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: lasin_pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@lasin.umsa.edu.bo
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - lasin_network
 
 volumes:
-  lasin_pgdata:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  lasin_network:
+    driver: bridge
