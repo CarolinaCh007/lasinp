@@ -14,7 +14,7 @@ from app.modules.courses.services.ruta_tiene_service import (
 router = APIRouter(prefix="/courses/rutas-relacion", tags=["🔗 Rutas-Cursos"])
 
 @router.post("/", response_model=RutaTieneRead, status_code=status.HTTP_201_CREATED, operation_id="crear_ruta_tiene")
-def crear(data: RutaTieneCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def crear(data: RutaTieneCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     return crear_ruta_tiene(db, data)
 
 @router.get("/por-ruta/{id_ruta}", response_model=List[RutaTieneRead], operation_id="listar_cursos_por_ruta")
@@ -26,6 +26,6 @@ def listar_rutas(id_curso: int, db: Session = Depends(get_db), current_user: Usu
     return listar_rutas_por_curso(db, id_curso)
 
 @router.delete("/{id_ruta}/{id_curso}", status_code=status.HTTP_204_NO_CONTENT, operation_id="eliminar_ruta_tiene")
-def eliminar(id_ruta: int, id_curso: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN"))):
+def eliminar(id_ruta: int, id_curso: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin"))):
     if not eliminar_ruta_tiene(db, id_ruta, id_curso):
         raise HTTPException(status_code=404, detail="Relación no encontrada")

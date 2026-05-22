@@ -49,3 +49,15 @@ class UsuarioUpdate(BaseModel):
     sexo: Optional[str] = Field(None, pattern="^(M|F|Otro)$")
     foto_perfil: Optional[str] = None
     estado: Optional[str] = Field(None, pattern="^(activo|inactivo|pendiente|bloqueado)$")
+
+from pydantic import BaseModel, Field
+
+class RolRead(BaseModel):
+    id_rol: int; nombre: str; descripcion: Optional[str]
+    class Config: from_attributes = True
+
+class AsignarRolRequest(BaseModel):
+    nombre_rol: str = Field(..., max_length=50, description="Nombre exacto del rol en BD (ej: ADMIN, DOCENTE)")
+
+class EstadoUpdateRequest(BaseModel):
+    estado: str = Field(..., pattern="^(activo|inactivo|pendiente|bloqueado)$")

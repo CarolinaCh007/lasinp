@@ -17,7 +17,7 @@ router = APIRouter(prefix="/evaluation", tags=["📊 Evaluación y Certificados"
 def crear_tipo_evaluacion(
     data: TipoEvaluacionCreate, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     return crear_tipo(db, data)
 
@@ -40,7 +40,7 @@ def obtener_tipo_evaluacion(
 def crear_actividad_endpoint(
     data: ActividadFinalCreate, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("DOCENTE", "ADMIN"))
+    current_user: Usuario = Depends(require_role("DOCENTE", "superadmin"))
 ):
     return crear_actividad(db, data)
 
@@ -49,7 +49,7 @@ def actualizar_actividad_endpoint(
     id_actividad: int, 
     data: ActividadFinalUpdate, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("DOCENTE", "ADMIN"))
+    current_user: Usuario = Depends(require_role("DOCENTE", "superadmin"))
 ):
     return _actualizar(db, id_actividad, ActividadFinal, data)
 
@@ -87,7 +87,7 @@ def listar_respuestas_inscripcion(
 def registrar_calificacion_endpoint(
     data: CalificacionCreate, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("DOCENTE", "ADMIN"))
+    current_user: Usuario = Depends(require_role("DOCENTE", "superadmin"))
 ):
     return crear_calificacion(db, data)
 
@@ -95,7 +95,7 @@ def registrar_calificacion_endpoint(
 def calcular_nota_final_endpoint(
     id_inscripcion: int, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("ADMIN", "DOCENTE"))
+    current_user: Usuario = Depends(require_role("superadmin", "DOCENTE"))
 ):
     nota = calcular_nota_final(db, id_inscripcion)
     return {"id_inscripcion": id_inscripcion, "nota_final": float(nota)}
@@ -108,7 +108,7 @@ def calcular_nota_final_endpoint(
 def registrar_asistencia_endpoint(
     data: AsistenciaCreate, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("DOCENTE", "ADMIN"))
+    current_user: Usuario = Depends(require_role("DOCENTE", "superadmin"))
 ):
     return crear_asistencia(db, data)
 
@@ -128,7 +128,7 @@ def listar_asistencia_inscripcion(
 def generar_certificado_endpoint(
     id_inscripcion: int, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     return generar_certificado(db, id_inscripcion)
 

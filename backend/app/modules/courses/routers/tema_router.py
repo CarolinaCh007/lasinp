@@ -10,7 +10,7 @@ from app.modules.courses.services.tema_service import crear_tema, obtener_tema, 
 router = APIRouter(prefix="/courses/temas", tags=["📑 Temas"])
 
 @router.post("/", response_model=TemaRead, status_code=status.HTTP_201_CREATED, operation_id="crear_tema")
-def crear(data: TemaCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def crear(data: TemaCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     return crear_tema(db, data)
 
 @router.get("/", response_model=List[TemaRead], operation_id="listar_temas")
@@ -25,13 +25,13 @@ def obtener(id_tema: int, db: Session = Depends(get_db), current_user: Usuario =
     return res
 
 @router.put("/{id_tema}", response_model=TemaRead, operation_id="actualizar_tema")
-def actualizar(id_tema: int, data: TemaUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def actualizar(id_tema: int, data: TemaUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     res = actualizar_tema(db, id_tema, data)
     if not res:
         raise HTTPException(status_code=404, detail="Tema no encontrado")
     return res
 
 @router.delete("/{id_tema}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar(id_tema: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN"))):
+def eliminar(id_tema: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin"))):
     if not eliminar_tema(db, id_tema):
         raise HTTPException(status_code=404, detail="Tema no encontrado")

@@ -13,7 +13,7 @@ router = APIRouter(prefix="/courses/rutas", tags=["🗺️ Rutas de Aprendizaje"
 def crear_ruta_aprendizaje(
     data: RutaAprendizajeCreate, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     return crear_ruta(db, data)
 
@@ -42,7 +42,7 @@ def actualizar_ruta_aprendizaje(
     id_ruta: int, 
     data: RutaAprendizajeUpdate, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     res = actualizar_ruta(db, id_ruta, data)
     if not res:
@@ -53,7 +53,7 @@ def actualizar_ruta_aprendizaje(
 def eliminar_ruta_aprendizaje(
     id_ruta: int, 
     db: Session = Depends(get_db), 
-    current_user: Usuario = Depends(require_role("ADMIN"))
+    current_user: Usuario = Depends(require_role("superadmin"))
 ):
     if not eliminar_ruta(db, id_ruta):
         raise HTTPException(status_code=404, detail="Ruta de aprendizaje no encontrada")

@@ -10,7 +10,7 @@ from app.modules.enrollment.services.pago_service import crear_pago, obtener_pag
 router = APIRouter(prefix="/enrollment/pagos", tags=["💰 Pagos"])
 
 @router.post("/", response_model=PagoRead, status_code=status.HTTP_201_CREATED, operation_id="crear_pago")
-def crear_pago_endpoint(data: PagoCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def crear_pago_endpoint(data: PagoCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     return crear_pago(db, data)
 
 @router.get("/", response_model=List[PagoRead], operation_id="listar_pagos")
@@ -24,13 +24,13 @@ def obtener_pago_endpoint(id_pago: int, db: Session = Depends(get_db), current_u
     return res
 
 @router.put("/{id_pago}", response_model=PagoRead, operation_id="actualizar_pago")
-def actualizar_pago_endpoint(id_pago: int, data: PagoUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def actualizar_pago_endpoint(id_pago: int, data: PagoUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     res = actualizar_pago(db, id_pago, data)
     if not res: raise HTTPException(status_code=404, detail="Pago no encontrado")
     return res
 
 @router.delete("/{id_pago}", status_code=status.HTTP_204_NO_CONTENT, operation_id="eliminar_pago")
-def eliminar_pago_endpoint(id_pago: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN"))):
+def eliminar_pago_endpoint(id_pago: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin"))):
     if not eliminar_pago(db, id_pago): raise HTTPException(status_code=404, detail="Pago no encontrado")
 
 from app.modules.enrollment.services.pago_service import listar_historial_pagos_estudiante
@@ -48,7 +48,7 @@ def historial_pagos_estudiante_endpoint(
     - ADMIN/COORD ve cualquier historial
     """
     if current_user.id_usuario != id_estudiante:
-        try: require_role("ADMIN", "COORDINADOR")(current_user=current_user, db=db)
+        try: require_role("superadmin", "COORDINADOR")(current_user=current_user, db=db)
         except: raise HTTPException(status_code=403, detail="Solo puedes ver tu propio historial o requerir rol ADMIN.")
     
     return listar_historial_pagos_estudiante(db, id_estudiante)

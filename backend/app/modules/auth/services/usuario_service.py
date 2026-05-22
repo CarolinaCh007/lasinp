@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 from app.modules.auth.models.usuario import Usuario
@@ -280,3 +280,41 @@ def obtener_usuario_completo_con_roles(db: Session, id_usuario: int) -> Optional
         "instancias": instancias_data,
         "rol_principal": rol_principal
     }
+
+from app.modules.auth.models.rol import Rol
+from app.modules.auth.models.instancia import Instancia
+
+# =============================================================================
+# 🔹 GESTIÓN DE ROLES Y ESTADOS
+# =============================================================================
+
+def obtener_roles_usuario(db: Session, id_usuario: int) -> List[Rol]:
+    """Retorna lista de objetos Rol asignados al usuario"""
+    stmt = select(Rol).join(Instancia).where(Instancia.id_usuario == id_usuario)
+    return db.execute(stmt).scalars().all()
+
+def asignar_rol_usuario(db: Session, id_usuario: int, nombre_rol: str) -> None:
+    """Asigna un rol existente a un usuario (valida duplicados)"""
+    rol = db.execute(select(Rol).where(Rol.nombre == nombre_rol)).scalar_one_or_none()
+    if not rol:
+        raise HTTPException(status_code=400, detail=f"Rol '{nombre_rol}' no existe en la BD")
+        
+    # Verificar que no tenga el rol ya asignado
+    existente = db.execute(
+        select(Instancia).where(Instancia.id_usuario == id_usuario, Instancia.id_rol == rol.id_rol)
+    ).scalar_one_or_none()
+    if existente:
+        raise HTTPException(status_code=400, detail="El usuario ya tiene este rol asignado")
+        
+    db.add(Instancia(id_usuario=id_usuario, id_rol=rol.id_rol))
+    db.commit()
+
+def cambiar_estado_usuario(db: Session, id_usuario: int, nuevo_estado: str) -> Optional[Usuario]:
+    """Actualiza el estado de un usuario"""
+    usuario = db.get(Usuario, id_usuario)
+    if not usuario:
+        return None
+    usuario.estado = nuevo_estado
+    db.commit()
+    db.refresh(usuario)
+    return usuario

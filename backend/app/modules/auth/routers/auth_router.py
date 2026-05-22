@@ -180,7 +180,7 @@ def crear_docente_admin(
     teacher_data: TeacherCreateRequest,
     db: Session = Depends(get_db),
     request: Request = None,
-    current_user: Usuario = Depends(require_role("ADMIN"))
+    current_user: Usuario = Depends(require_role("superadmin"))
 ):
     """
     Crear docente (solo para administradores).
@@ -213,9 +213,9 @@ def crear_admin(
     admin_data: AdminCreateRequest,
     db: Session = Depends(get_db),
     request: Request = None,
-    current_user: Usuario = Depends(require_role("ADMIN"))
+    current_user: Usuario = Depends(require_role("superadmin"))
 ):
-    """Crear administrador (solo SUPERADMIN)"""
+    """Crear administrador (solo superadmin)"""
     if obtener_usuario_por_email(db, admin_data.correo_electronico):
         raise HTTPException(status_code=400, detail="Correo ya registrado")
     

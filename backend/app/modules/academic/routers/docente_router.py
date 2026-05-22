@@ -21,7 +21,7 @@ def _verificar_permiso_docente(current_user: Usuario, target_id: int, db: Sessio
     """Verifica permisos para operaciones en perfiles de docente"""
     if requerir_admin:
         try:
-            require_role("ADMIN")(current_user=current_user, db=db)
+            require_role("superadmin")(current_user=current_user, db=db)
             return True
         except:
             raise HTTPException(status_code=403, detail="Permiso denegado. Se requiere rol ADMIN.")
@@ -30,7 +30,7 @@ def _verificar_permiso_docente(current_user: Usuario, target_id: int, db: Sessio
         return True
     
     try:
-        require_role("ADMIN")(current_user=current_user, db=db)
+        require_role("superadmin")(current_user=current_user, db=db)
         return True
     except:
         raise HTTPException(status_code=403, detail="Permiso denegado. Solo puedes editar tu propio perfil.")
@@ -56,7 +56,7 @@ def listar_docentes_endpoint(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     """Listar docentes (solo ADMIN/COORDINADOR)"""
     return listar_docentes(db, skip, limit)
@@ -94,7 +94,7 @@ def actualizar_docente_endpoint(
 def eliminar_docente_endpoint(
     id_usuario: int,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN"))
+    current_user: Usuario = Depends(require_role("superadmin"))
 ):
     """Eliminar perfil de docente (solo ADMIN)"""
     if not eliminar_docente(db, id_usuario):
@@ -145,7 +145,7 @@ def actualizar_portafolio_endpoint(
 def eliminar_portafolio_endpoint(
     id_docente: int,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN"))
+    current_user: Usuario = Depends(require_role("superadmin"))
 ):
     """Eliminar portafolio (solo ADMIN)"""
     if not eliminar_portafolio(db, id_docente):

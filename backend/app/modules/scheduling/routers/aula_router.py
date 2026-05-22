@@ -13,7 +13,7 @@ router = APIRouter(prefix="/scheduling/aulas", tags=["🏫 Aulas"])
 def crear_aula_endpoint(
     data: AulaCreate,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     return crear_aula(db, data)
 
@@ -42,7 +42,7 @@ def actualizar_aula_endpoint(
     id_aula: int,
     data: AulaUpdate,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     res = actualizar_aula(db, id_aula, data)
     if not res:
@@ -53,7 +53,7 @@ def actualizar_aula_endpoint(
 def eliminar_aula_endpoint(
     id_aula: int,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN"))
+    current_user: Usuario = Depends(require_role("superadmin"))
 ):
     if not eliminar_aula(db, id_aula):
         raise HTTPException(status_code=404, detail="Aula no encontrada")

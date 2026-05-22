@@ -10,7 +10,7 @@ from app.modules.enrollment.services.inscripcion_service import crear_inscripcio
 router = APIRouter(prefix="/enrollment/inscripciones", tags=["📝 Inscripciones"])
 
 @router.post("/", response_model=InscripcionRead, status_code=status.HTTP_201_CREATED, operation_id="crear_inscripcion")
-def crear_inscripcion_endpoint(data: InscripcionCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def crear_inscripcion_endpoint(data: InscripcionCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     return crear_inscripcion(db, data)
 
 @router.get("/", response_model=List[InscripcionRead], operation_id="listar_inscripciones")
@@ -24,13 +24,13 @@ def obtener_inscripcion_endpoint(id_inscripcion: int, db: Session = Depends(get_
     return res
 
 @router.put("/{id_inscripcion}", response_model=InscripcionRead, operation_id="actualizar_inscripcion")
-def actualizar_inscripcion_endpoint(id_inscripcion: int, data: InscripcionUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def actualizar_inscripcion_endpoint(id_inscripcion: int, data: InscripcionUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     res = actualizar_inscripcion(db, id_inscripcion, data)
     if not res: raise HTTPException(status_code=404, detail="Inscripción no encontrada")
     return res
 
 @router.delete("/{id_inscripcion}", status_code=status.HTTP_204_NO_CONTENT, operation_id="eliminar_inscripcion")
-def eliminar_inscripcion_endpoint(id_inscripcion: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN"))):
+def eliminar_inscripcion_endpoint(id_inscripcion: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin"))):
     eliminar_inscripcion(db, id_inscripcion)
 
 
@@ -52,7 +52,7 @@ def crear_inscripcion_con_pago_endpoint(
     - Solo el propio estudiante o ADMIN pueden ejecutarlo
     """
     if current_user.id_usuario != data.inscripcion.id_estudiante:
-        try: require_role("ADMIN")(current_user=current_user, db=db)
+        try: require_role("superadmin")(current_user=current_user, db=db)
         except: raise HTTPException(status_code=403, detail="Solo puedes inscribirte a ti mismo o requerir rol ADMIN.")
     
     return crear_inscripcion_con_pago(db, data)
@@ -62,7 +62,7 @@ def crear_inscripcion_con_pago_endpoint(
 def listar_inscritos_por_curso_endpoint(
     id_curso: int,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     """Lista de estudiantes inscritos a un curso específico (solo ADMIN/COORD)"""
     return listar_inscritos_por_curso(db, id_curso)
@@ -73,7 +73,7 @@ def actualizar_estado_inscripcion_endpoint(
     id_inscripcion: int,
     nuevo_estado: str = Query(..., description="activo | inactivo | pendiente | retirado"),
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     """
     Aprueba/rechaza inscripción tras verificar comprobante.

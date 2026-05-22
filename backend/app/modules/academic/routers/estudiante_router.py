@@ -29,7 +29,7 @@ def _verificar_permiso_estudiante(current_user: Usuario, target_id: int, db: Ses
     # Si requiere admin, verificar rol
     if requerir_admin:
         try:
-            require_role("ADMIN")(current_user=current_user, db=db)
+            require_role("superadmin")(current_user=current_user, db=db)
             return True
         except:
             raise HTTPException(status_code=403, detail="Permiso denegado. Se requiere rol ADMIN.")
@@ -40,7 +40,7 @@ def _verificar_permiso_estudiante(current_user: Usuario, target_id: int, db: Ses
     
     # O si es ADMIN, también puede
     try:
-        require_role("ADMIN")(current_user=current_user, db=db)
+        require_role("superadmin")(current_user=current_user, db=db)
         return True
     except:
         raise HTTPException(status_code=403, detail="Permiso denegado. Solo puedes editar tu propio perfil.")
@@ -70,7 +70,7 @@ def listar_estudiantes_endpoint(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     """Listar estudiantes (solo ADMIN/COORDINADOR)"""
     return listar_estudiantes(db, skip, limit)
@@ -116,7 +116,7 @@ def actualizar_estudiante_endpoint(
 def eliminar_estudiante_endpoint(
     id_usuario: int,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN"))
+    current_user: Usuario = Depends(require_role("superadmin"))
 ):
     """Eliminar perfil de estudiante (solo ADMIN)"""
     if not eliminar_estudiante(db, id_usuario):

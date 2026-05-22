@@ -15,7 +15,7 @@ router = APIRouter(prefix="/academic/portafolios", tags=["💼 Portafolios"])
 def crear(data: PortafolioCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     # Solo ADMIN o el propio DOCENTE pueden crear
     if current_user.id_usuario != data.id_docente:
-        try: require_role("ADMIN")(current_user=current_user, db=db)
+        try: require_role("superadmin")(current_user=current_user, db=db)
         except: raise HTTPException(status_code=403, detail="Permiso denegado")
     return crear_portafolio(db, data)
 
@@ -28,10 +28,10 @@ def obtener(id_docente: int, db: Session = Depends(get_db), current_user: Usuari
 @router.put("/{id_docente}", response_model=PortafolioRead)
 def actualizar(id_docente: int, data: PortafolioUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     if current_user.id_usuario != id_docente:
-        try: require_role("ADMIN")(current_user=current_user, db=db)
+        try: require_role("superadmin")(current_user=current_user, db=db)
         except: raise HTTPException(status_code=403, detail="Permiso denegado")
     return actualizar_portafolio(db, id_docente, data)
 
 @router.delete("/{id_docente}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar(id_docente: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN"))):
+def eliminar(id_docente: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin"))):
     if not eliminar_portafolio(db, id_docente): raise HTTPException(status_code=404, detail="No encontrado")

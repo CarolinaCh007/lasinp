@@ -10,7 +10,7 @@ from app.modules.courses.services.curso_service import crear_curso, obtener_curs
 router = APIRouter(prefix="/courses/cursos", tags=["📚 Cursos"])
 
 @router.post("/", response_model=CursoRead, status_code=status.HTTP_201_CREATED, operation_id="crear_curso")
-def crear(data: CursoCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def crear(data: CursoCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     return crear_curso(db, data)
 
 @router.get("/", response_model=List[CursoRead], operation_id="listar_cursos")
@@ -24,11 +24,11 @@ def obtener(id_curso: int, db: Session = Depends(get_db), current_user: Usuario 
     return res
 
 @router.put("/{id_curso}", response_model=CursoRead)
-def actualizar(id_curso: int, data: CursoUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))):
+def actualizar(id_curso: int, data: CursoUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))):
     res = actualizar_curso(db, id_curso, data)
     if not res: raise HTTPException(status_code=404, detail="Curso no encontrado")
     return res
 
 @router.delete("/{id_curso}", status_code=status.HTTP_204_NO_CONTENT, operation_id="eliminar_curso")
-def eliminar(id_curso: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("ADMIN"))):
+def eliminar(id_curso: int, db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin"))):
     if not eliminar_curso(db, id_curso): raise HTTPException(status_code=404, detail="Curso no encontrado")

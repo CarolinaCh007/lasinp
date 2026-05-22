@@ -15,7 +15,7 @@ router = APIRouter(prefix="/scheduling/horarios", tags=["🗓️ Horarios"])
 def crear_horario_endpoint(
     data: HorarioCreate,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     try:
         return crear_horario(db, data)
@@ -51,7 +51,7 @@ def actualizar_horario_endpoint(
     id_horario: int,
     data: HorarioUpdate,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN", "COORDINADOR"))
+    current_user: Usuario = Depends(require_role("superadmin", "COORDINADOR"))
 ):
     try:
         res = actualizar_horario(db, id_horario, data)
@@ -65,7 +65,7 @@ def actualizar_horario_endpoint(
 def eliminar_horario_endpoint(
     id_horario: int,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(require_role("ADMIN"))
+    current_user: Usuario = Depends(require_role("superadmin"))
 ):
     if not eliminar_horario(db, id_horario):
         raise HTTPException(status_code=404, detail="Horario no encontrado")
