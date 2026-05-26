@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
+
+from app.modules.auth.schemas.auth import InstanceInfo
 
 class UsuarioCreate(BaseModel):
     ci: Optional[str] = Field(None, max_length=20)
@@ -33,6 +35,7 @@ class UsuarioRead(BaseModel):
     created_at: datetime
     updated_at: datetime
     # ❌ ultimo_acceso ELIMINADO
+    instancias: Optional[List[InstanceInfo]] = []
 
     class Config:
         from_attributes = True
@@ -55,6 +58,8 @@ from pydantic import BaseModel, Field
 class RolRead(BaseModel):
     id_rol: int; nombre: str; descripcion: Optional[str]
     class Config: from_attributes = True
+
+
 
 class AsignarRolRequest(BaseModel):
     nombre_rol: str = Field(..., max_length=50, description="Nombre exacto del rol en BD (ej: ADMIN, DOCENTE)")

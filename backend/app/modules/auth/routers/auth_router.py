@@ -33,8 +33,12 @@ from app.modules.auth.services.usuario_service import (
     verificar_email_usuario,
     solicitar_reset_password,
     resetear_contrasena,
-        obtener_usuario_completo_con_roles
+    obtener_usuario_completo_con_roles
 )
+from app.modules.academic.schemas.estudiante import EstudianteCreate
+from app.modules.academic.schemas.docente import DocenteCreate
+from app.modules.academic.services.estudiante_service import crear_estudiante
+from app.modules.academic.services.docente_service import crear_docente
 from app.core.security import get_current_user, require_role
 from app.modules.auth.models.usuario import Usuario
 
@@ -154,8 +158,7 @@ def registrar_estudiante_publico(
 ):
     """
     Registro público para estudiantes.
-    Crea: USUARIO(estado='pendiente') + INSTANCIA(rol=4)
-    ⚠️ El perfil académico (institucion, fecha_ingreso) se completa después vía /academic/estudiantes/
+    Crea: USUARIO(estado='pendiente') + INSTANCIA(rol=4) + PERFIL_ESTUDIANTE
     """
     if obtener_usuario_por_email(db, student_data.correo_electronico):
         raise HTTPException(status_code=400, detail="Correo ya registrado")
@@ -169,6 +172,21 @@ def registrar_estudiante_publico(
         usuario_data=usuario_data,
         id_rol=4
     )
+
+    try:
+        crear_estudiante(db, EstudianteCreate(
+            id_usuario=nuevo_usuario.id_usuario,
+            institucion=student_data.institucion,
+            fecha_ingreso=student_data.fecha_ingreso
+        ))
+    except HTTPException as exc:
+        db.delete(nuevo_usuario)
+        db.commit()
+        raise exc
+    except Exception as exc:
+        db.delete(nuevo_usuario)
+        db.commit()
+        raise HTTPException(status_code=500, detail="Error al crear el perfil académico de estudiante")
     
     ip = request.client.host if request else None
     registrar_auditoria(db, nuevo_usuario.id_usuario, "REGISTER_STUDENT", "usuario", ip)
@@ -184,8 +202,7 @@ def crear_docente_admin(
 ):
     """
     Crear docente (solo para administradores).
-    Crea: USUARIO + INSTANCIA(rol=3)
-    ⚠️ El perfil profesional (especialidad, portafolio) se completa después vía /academic/docentes/
+    Crea: USUARIO + INSTANCIA(rol=3) + PERFIL_DOCENTE
     """
     if obtener_usuario_por_email(db, teacher_data.correo_electronico):
         raise HTTPException(status_code=400, detail="Correo ya registrado")
@@ -202,7 +219,23 @@ def crear_docente_admin(
         usuario_data=usuario_data,
         id_rol=3
     )
-    
+
+    try:
+        crear_docente(db, DocenteCreate(
+            id_usuario=nuevo_usuario.id_usuario,
+            especialidad=teacher_data.especialidad,
+            grado_academico=teacher_data.grado_academico,
+            anios_experiencia=teacher_data.anios_experiencia
+        ))
+    except HTTPException as exc:
+        db.delete(nuevo_usuario)
+        db.commit()
+        raise exc
+    except Exception as exc:
+        db.delete(nuevo_usuario)
+        db.commit()
+        raise HTTPException(status_code=500, detail="Error al crear el perfil académico de docente")
+
     ip = request.client.host if request else None
     registrar_auditoria(db, nuevo_usuario.id_usuario, "CREATE_TEACHER", "usuario", ip)
     

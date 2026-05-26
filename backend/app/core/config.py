@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # 🔹 Base de datos (SOLO credenciales separadas, SIN DATABASE_URL como campo)
     DB_USER: str = os.getenv("DB_USER", "lasin_user")
-    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "lasin_user")  # ← Cambiar "lasin123" → "lasin_user"
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "lasin123")  # ← Cambiar "lasin123" → "lasin_user"
     DB_HOST: str = os.getenv("DB_HOST", "localhost")
     DB_PORT: int = int(os.getenv("DB_PORT", 5432))
     DB_NAME: str = os.getenv("DB_NAME", "lasin_db")

@@ -5,7 +5,7 @@ from sqlalchemy.engine import Engine
 # 🔹 Leer credenciales directamente de variables de entorno (bypass Pydantic para BD)
 import os
 DB_USER = os.getenv("DB_USER", "lasin_user")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "lasin_user")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "lasin123")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = int(os.getenv("DB_PORT", 5432))
 DB_NAME = os.getenv("DB_NAME", "lasin_db")

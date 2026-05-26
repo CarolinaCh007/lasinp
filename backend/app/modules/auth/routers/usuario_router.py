@@ -8,9 +8,10 @@ from app.core.security import get_current_user, require_role
 from app.modules.auth.models.usuario import Usuario
 from app.modules.auth.models.rol import Rol
 from app.modules.auth.models.instancia import Instancia
+from app.modules.auth.models.log_auditoria import LogAuditoria
 from app.modules.auth.schemas.usuario import (
     UsuarioRead, UsuarioUpdate, RolRead,
-    AsignarRolRequest, EstadoUpdateRequest
+     AsignarRolRequest, EstadoUpdateRequest
 )
 from app.modules.auth.services.usuario_service import (
     actualizar_usuario, obtener_roles_usuario,
@@ -35,6 +36,21 @@ def listar_usuarios(
     if estado:
         query = query.where(Usuario.estado == estado)
     return db.execute(query.offset(skip).limit(limit)).scalars().all()
+
+# =============================================================================
+# 🔹 GESTIÓN DE ROLES (ADMIN) — DEBE ESTAR ANTES DE /{id_usuario}
+# =============================================================================
+
+
+
+@router.get("/roles/disponibles", response_model=List[RolRead], operation_id="listar_roles_disponibles")
+def listar_roles(db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin"))):
+    """Lista todos los roles existentes en el sistema"""
+    return db.execute(select(Rol).order_by(Rol.nombre)).scalars().all()
+
+# =============================================================================
+# 🔹 CRUD DETALLADO DE USUARIOS
+# =============================================================================
 
 @router.get("/{id_usuario}", response_model=UsuarioRead, operation_id="obtener_usuario")
 def obtener_usuario(
@@ -65,15 +81,6 @@ def actualizar_usuario_endpoint(
     if not result:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return result
-
-# =============================================================================
-# 🔹 GESTIÓN DE ROLES (ADMIN)
-# =============================================================================
-
-@router.get("/roles/disponibles", response_model=List[RolRead], operation_id="listar_roles_disponibles")
-def listar_roles(db: Session = Depends(get_db), current_user: Usuario = Depends(require_role("superadmin"))):
-    """Lista todos los roles existentes en el sistema"""
-    return db.execute(select(Rol).order_by(Rol.nombre)).scalars().all()
 
 @router.get("/{id_usuario}/roles", response_model=List[RolRead], operation_id="obtener_roles_usuario")
 def obtener_roles_de_usuario(
